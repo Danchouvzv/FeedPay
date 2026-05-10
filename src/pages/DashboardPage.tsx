@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { BarChart3, Gift, MessageSquareText, RefreshCcw, Star, Target, Trash2, TrendingUp } from 'lucide-react'
 import { ReviewCard } from '../components/ReviewCard'
@@ -73,6 +74,12 @@ export function DashboardPage() {
               <RefreshCcw className="size-4" />
               Demo reviews
             </button>
+            <Link
+              to="/import"
+              className="inline-flex items-center justify-center gap-2 rounded-full border-2 border-black bg-white px-5 py-4 text-sm font-black uppercase text-black shadow-[5px_5px_0_#000] transition hover:-translate-y-0.5"
+            >
+              Import 2ГИС
+            </Link>
             <button
               onClick={clear}
               className="inline-flex items-center justify-center gap-2 rounded-full border-2 border-black bg-white px-5 py-4 text-sm font-black uppercase text-black shadow-[5px_5px_0_#000] transition hover:-translate-y-0.5"

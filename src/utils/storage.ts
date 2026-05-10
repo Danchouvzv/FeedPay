@@ -34,6 +34,11 @@ export function saveReview(review: Review) {
   saveReviews([review, ...reviews])
 }
 
+export function saveImportedReviews(importedReviews: Review[]) {
+  const reviews = getReviews()
+  saveReviews([...importedReviews, ...reviews])
+}
+
 export function resetDemoReviews() {
   saveReviews(demoReviews)
 }

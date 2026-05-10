@@ -20,6 +20,7 @@ export type ReviewAnalysis = {
   topics: string[]
   discount: number
   coupon: string | null
+  provider?: 'local' | 'openai'
 }
 
 export type Review = {
@@ -35,4 +36,5 @@ export type Review = {
   criteria: ReviewCriteria
   topics: string[]
   createdAt: string
+  source?: 'manual' | '2gis-import' | 'demo'
 }

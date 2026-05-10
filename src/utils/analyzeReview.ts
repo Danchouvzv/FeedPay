@@ -149,5 +149,6 @@ export function analyzeReview(text: string): ReviewAnalysis {
     topics,
     discount,
     coupon,
+    provider: 'local',
   }
 }

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AlertCircle, ArrowRight, Clock3, MessageSquareText, Sparkles, Star } from 'lucide-react'
-import { analyzeReview } from '../utils/analyzeReview'
+import { analyzeReviewWithAI } from '../utils/aiAnalysis'
 import { saveReview } from '../utils/storage'
 import type { Review } from '../types/review'
 
@@ -15,6 +15,7 @@ export function ReviewPage() {
   const [rating, setRating] = useState(5)
   const [text, setText] = useState('')
   const [errors, setErrors] = useState<FormErrors>({})
+  const [isAnalyzing, setIsAnalyzing] = useState(false)
 
   const validate = () => {
     const nextErrors: FormErrors = {}
@@ -26,11 +27,12 @@ export function ReviewPage() {
     return Object.keys(nextErrors).length === 0
   }
 
-  const handleSubmit = (event: FormEvent) => {
+  const handleSubmit = async (event: FormEvent) => {
     event.preventDefault()
     if (!validate()) return
 
-    const analysis = analyzeReview(text)
+    setIsAnalyzing(true)
+    const analysis = await analyzeReviewWithAI(text)
     const review: Review = {
       id: crypto.randomUUID(),
       customerName: customerName.trim(),
@@ -44,9 +46,11 @@ export function ReviewPage() {
       criteria: analysis.criteria,
       topics: analysis.topics,
       createdAt: new Date().toISOString(),
+      source: 'manual',
     }
 
     saveReview(review)
+    setIsAnalyzing(false)
     navigate('/analysis', { state: { review } })
   }
 
@@ -158,9 +162,10 @@ export function ReviewPage() {
 
             <button
               type="submit"
+              disabled={isAnalyzing}
               className="inline-flex items-center justify-center gap-2 rounded-full border-2 border-black bg-[#0038FF] px-6 py-4 text-sm font-black uppercase text-white shadow-[6px_6px_0_#000] transition hover:-translate-y-0.5 hover:shadow-[8px_8px_0_#000]"
             >
-              Проверить отзыв
+              {isAnalyzing ? 'AI анализирует...' : 'Проверить отзыв'}
               <ArrowRight className="size-5" strokeWidth={4} />
             </button>
           </div>

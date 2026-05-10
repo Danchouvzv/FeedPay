@@ -1,73 +1,50 @@
-# React + TypeScript + Vite
+# FeedPay
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+FeedPay is a React + TypeScript MVP for rewarding detailed customer feedback with coupons and business analytics.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Mobile-first review form
+- AI-ready review scoring from 0 to 100
+- Coupon generation: `FEED3`, `FEED5`, `FEED10`
+- Dashboard with charts, topics, coupons and latest reviews
+- 2GIS-style pasted review importer at `/import`
+- `localStorage` persistence for MVP mode
 
-## React Compiler
+## Run
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Open `http://localhost:5173`.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Run With Real AI Analysis
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+Create `.env` from `.env.example`:
+
+```bash
+cp .env.example .env
 ```
+
+Set:
+
+```bash
+OPENAI_API_KEY=sk-your-key-here
+OPENAI_MODEL=gpt-4.1-mini
+```
+
+Start frontend and API together:
+
+```bash
+npm run dev:full
+```
+
+If the API key is missing or the API is unavailable, FeedPay automatically falls back to the local deterministic scoring algorithm.
+
+## 2GIS Import
+
+Go to `/import`, paste copied reviews from 2GIS into the textarea, set the product/branch name, and click import. The app parses separate review blocks, runs scoring, and saves them to the dashboard.
+
+Direct scraping is intentionally not used in the browser because public review pages can block cross-origin requests and may change markup or access rules.

@@ -14,6 +14,17 @@ const sample = `Алия
 3 из 5
 Заказ ждал 35 минут, хотя в приложении было указано 15 минут. Персонал был вежливый, но хотелось бы видеть более точное время ожидания.`
 
+async function readResponsePayload(response: Response) {
+  const text = await response.text()
+  if (!text) return null
+
+  try {
+    return JSON.parse(text) as { error?: string; reviews?: Array<{ customerName: string; rating: number; text: string; date?: string | null; placeName?: string | null }> }
+  } catch {
+    return { error: text }
+  }
+}
+
 export function ImportPage() {
   const [productName, setProductName] = useState('2ГИС импорт')
   const [placeUrl, setPlaceUrl] = useState('')
@@ -79,8 +90,9 @@ export function ImportPage() {
         body: JSON.stringify({ url: placeUrl.trim(), maxReviews }),
       })
 
-      const payload = await response.json()
-      if (!response.ok) throw new Error(payload.error ?? 'Apify import failed')
+      const payload = await readResponsePayload(response)
+      if (!response.ok) throw new Error(payload?.error ?? 'FeedPay API недоступен. Запустите проект через npm run dev:full.')
+      if (!payload?.reviews?.length) throw new Error('Apify не вернул отзывы по этой ссылке. Проверьте URL 2ГИС или увеличьте лимит отзывов.')
 
       await analyzeAndSave(payload.reviews, '2gis-apify')
     } catch (caughtError) {

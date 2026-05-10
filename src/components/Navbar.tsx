@@ -28,6 +28,9 @@ export function Navbar() {
           <NavLink to="/pipeline" className={navLinkClass}>
             Pipeline
           </NavLink>
+          <NavLink to="/campaigns" className={navLinkClass}>
+            QR
+          </NavLink>
           <a href="/#how-it-works" className="rounded-full px-4 py-2 text-xs font-black uppercase text-white transition hover:bg-white hover:text-[#0038FF]">
             Как работает
           </a>

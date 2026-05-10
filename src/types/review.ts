@@ -37,4 +37,38 @@ export type Review = {
   topics: string[]
   createdAt: string
   source?: 'manual' | '2gis-import' | '2gis-apify' | 'demo'
+  campaignId?: string
+}
+
+export type Campaign = {
+  id: string
+  name: string
+  branchName: string
+  rewardRule: string
+  qrUrl: string
+  createdAt: string
+  expiresAt: string
+  couponLimit: number
+  issuedCoupons: number
+}
+
+export type CouponRedemption = {
+  id: string
+  code: string
+  customerName: string
+  discount: number
+  status: 'redeemed' | 'rejected'
+  redeemedAt: string
+  note: string
+}
+
+export type ManagerTask = {
+  id: string
+  title: string
+  topic: string
+  priority: 'High' | 'Medium' | 'Low'
+  status: 'open' | 'in_progress' | 'done'
+  source: 'pipeline' | 'manual'
+  createdAt: string
+  description: string
 }

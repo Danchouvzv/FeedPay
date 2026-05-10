@@ -183,6 +183,8 @@ Shows:
 - latest reviews
 - AI action board
 - pipeline health metrics
+- CSV export
+- links to campaign builder, coupon redemption, manager tasks, and partner demo case
 
 Route:
 
@@ -208,6 +210,50 @@ Route:
 
 ```text
 /pipeline
+```
+
+### QR Campaign Builder
+
+Creates review campaigns for branches and generates QR links that can be printed at checkout, on receipts, or on packaging.
+
+Route:
+
+```text
+/campaigns
+```
+
+### Coupon Redemption
+
+Cashier mode for redeeming issued coupons such as `FEED3`, `FEED5`, and `FEED10`.
+
+Route:
+
+```text
+/redeem
+```
+
+### Manager Task Board
+
+Turns pipeline action items into tasks with statuses:
+
+```text
+open -> in_progress -> done
+```
+
+Route:
+
+```text
+/tasks
+```
+
+### Partner Demo Case
+
+A guided scenario for showing the product to partners using a coffee shop example.
+
+Route:
+
+```text
+/case/coffee-shop
 ```
 
 ## Intelligence Pipeline
@@ -339,6 +385,10 @@ Business value:
 - operational priorities from real feedback
 - faster reaction to repeated issues
 - import of existing external reputation data
+- QR campaigns for physical locations
+- coupon redemption loop for cashiers
+- manager task board for operational follow-up
+- CSV export for reporting
 
 ## Technical Stack
 
@@ -378,6 +428,7 @@ src/utils/aiAnalysis.ts         OpenAI endpoint fallback adapter
 src/utils/intelligence.ts       pipeline metrics, risk, action items
 src/utils/parse2gisReviews.ts   pasted review parser
 src/utils/storage.ts            localStorage layer
+src/utils/exportCsv.ts          CSV export
 server/analyze.js               OpenAI + Apify backend endpoints
 ```
 
@@ -456,6 +507,7 @@ Current limitations:
 - reviews are stored in browser `localStorage`
 - no business authentication yet
 - no real coupon redemption tracking yet
+- coupon redemption is local MVP storage, not a production cashier system yet
 - no multi-tenant business accounts yet
 - no production database yet
 - no payment or billing layer yet

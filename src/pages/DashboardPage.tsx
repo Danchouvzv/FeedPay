@@ -6,6 +6,7 @@ import { ReviewCard } from '../components/ReviewCard'
 import { StatCard } from '../components/StatCard'
 import { clearReviews, getReviews, resetDemoReviews } from '../utils/storage'
 import { topicKeywords } from '../utils/analyzeReview'
+import { exportReviewsCsv } from '../utils/exportCsv'
 import { getActionItems, getDuplicateGroups, getPipelineMetrics } from '../utils/intelligence'
 import type { ReviewLevel } from '../types/review'
 
@@ -90,6 +91,18 @@ export function DashboardPage() {
             >
               Pipeline
             </Link>
+            <Link
+              to="/campaigns"
+              className="inline-flex items-center justify-center gap-2 rounded-full border-2 border-black bg-white px-5 py-4 text-sm font-black uppercase text-black shadow-[5px_5px_0_#000] transition hover:-translate-y-0.5"
+            >
+              QR builder
+            </Link>
+            <button
+              onClick={() => exportReviewsCsv(reviews)}
+              className="inline-flex items-center justify-center gap-2 rounded-full border-2 border-black bg-white px-5 py-4 text-sm font-black uppercase text-black shadow-[5px_5px_0_#000] transition hover:-translate-y-0.5"
+            >
+              Export CSV
+            </button>
             <button
               onClick={clear}
               className="inline-flex items-center justify-center gap-2 rounded-full border-2 border-black bg-white px-5 py-4 text-sm font-black uppercase text-black shadow-[5px_5px_0_#000] transition hover:-translate-y-0.5"
@@ -134,6 +147,9 @@ export function DashboardPage() {
               <p className="rounded-[1.5rem] bg-[#F8F9FA] p-4 text-sm font-bold text-black/55">Action items появятся после отзывов.</p>
             )}
           </div>
+          <Link to="/tasks" className="mt-5 inline-flex w-full items-center justify-center rounded-full border-2 border-black bg-[#CCFF00] px-5 py-3 text-xs font-black uppercase text-black shadow-[4px_4px_0_#000]">
+            Открыть manager tasks
+          </Link>
         </article>
 
         <article className="rounded-[2.5rem] border-2 border-black bg-[#0038FF] p-5 text-white shadow-[10px_10px_0_#000]">
@@ -146,6 +162,24 @@ export function DashboardPage() {
             <MiniMetric label="Urgent" value={pipelineMetrics.urgent} />
           </div>
         </article>
+      </section>
+
+      <section className="mt-6 grid gap-4 md:grid-cols-3">
+        <Link to="/campaigns" className="rounded-[2rem] border-2 border-black bg-white p-5 text-black shadow-[7px_7px_0_#000]">
+          <p className="text-xs font-black uppercase text-black/45">Campaigns</p>
+          <h2 className="mt-2 text-2xl font-black uppercase">QR builder</h2>
+          <p className="mt-2 text-sm font-bold text-black/55">Создать кампанию и QR для филиала.</p>
+        </Link>
+        <Link to="/redeem" className="rounded-[2rem] border-2 border-black bg-white p-5 text-black shadow-[7px_7px_0_#000]">
+          <p className="text-xs font-black uppercase text-black/45">Cashier</p>
+          <h2 className="mt-2 text-2xl font-black uppercase">Coupon redeem</h2>
+          <p className="mt-2 text-sm font-bold text-black/55">Погасить FEED3/5/10 на кассе.</p>
+        </Link>
+        <Link to="/case/coffee-shop" className="rounded-[2rem] border-2 border-black bg-[#CCFF00] p-5 text-black shadow-[7px_7px_0_#000]">
+          <p className="text-xs font-black uppercase text-black/45">Partner demo</p>
+          <h2 className="mt-2 text-2xl font-black uppercase">Coffee shop case</h2>
+          <p className="mt-2 text-sm font-bold text-black/55">Сценарий показа продукта партнёрам.</p>
+        </Link>
       </section>
 
       <section className="mt-6 grid gap-6 lg:grid-cols-[1fr_0.9fr]">

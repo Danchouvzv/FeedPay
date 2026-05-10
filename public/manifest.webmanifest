@@ -1,0 +1,17 @@
+{
+  "name": "FeedPay",
+  "short_name": "FeedPay",
+  "description": "Бонусы за полезные отзывы и dashboard аналитики для бизнеса.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2563eb",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

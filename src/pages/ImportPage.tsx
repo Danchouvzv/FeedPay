@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowRight, ClipboardPaste, Database, Sparkles } from 'lucide-react'
+import { ArrowRight, ClipboardPaste, Database, Link2, Sparkles } from 'lucide-react'
 import type { Review } from '../types/review'
 import { analyzeReviewWithAI } from '../utils/aiAnalysis'
 import { parse2gisReviews } from '../utils/parse2gisReviews'
@@ -16,18 +16,24 @@ const sample = `Алия
 
 export function ImportPage() {
   const [productName, setProductName] = useState('2ГИС импорт')
+  const [placeUrl, setPlaceUrl] = useState('')
+  const [maxReviews, setMaxReviews] = useState(50)
   const [rawText, setRawText] = useState(sample)
   const [isImporting, setIsImporting] = useState(false)
+  const [isScraping, setIsScraping] = useState(false)
+  const [error, setError] = useState('')
   const [importedCount, setImportedCount] = useState(0)
   const parsed = useMemo(() => parse2gisReviews(rawText), [rawText])
 
-  const importReviews = async () => {
-    if (!productName.trim() || parsed.length === 0) return
+  const analyzeAndSave = async (
+    reviews: Array<{ customerName: string; rating: number; text: string; date?: string | null }>,
+    source: '2gis-import' | '2gis-apify',
+  ) => {
+    if (!productName.trim() || reviews.length === 0) return 0
 
-    setIsImporting(true)
     const analyzedReviews: Review[] = []
 
-    for (const parsedReview of parsed) {
+    for (const parsedReview of reviews) {
       const analysis = await analyzeReviewWithAI(parsedReview.text)
       analyzedReviews.push({
         id: crypto.randomUUID(),
@@ -41,14 +47,47 @@ export function ImportPage() {
         discount: analysis.discount,
         criteria: analysis.criteria,
         topics: analysis.topics,
-        createdAt: new Date().toISOString(),
-        source: '2gis-import',
+        createdAt: parsedReview.date ? new Date(parsedReview.date).toISOString() : new Date().toISOString(),
+        source,
       })
     }
 
     saveImportedReviews(analyzedReviews)
     setImportedCount(analyzedReviews.length)
+    return analyzedReviews.length
+  }
+
+  const importReviews = async () => {
+    if (!productName.trim() || parsed.length === 0) return
+
+    setIsImporting(true)
+    setError('')
+    await analyzeAndSave(parsed, '2gis-import')
     setIsImporting(false)
+  }
+
+  const scrapeWithApify = async () => {
+    if (!placeUrl.trim()) return
+
+    setIsScraping(true)
+    setError('')
+
+    try {
+      const response = await fetch('/api/import/2gis', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: placeUrl.trim(), maxReviews }),
+      })
+
+      const payload = await response.json()
+      if (!response.ok) throw new Error(payload.error ?? 'Apify import failed')
+
+      await analyzeAndSave(payload.reviews, '2gis-apify')
+    } catch (caughtError) {
+      setError(caughtError instanceof Error ? caughtError.message : 'Не удалось импортировать через Apify')
+    } finally {
+      setIsScraping(false)
+    }
   }
 
   return (
@@ -58,13 +97,13 @@ export function ImportPage() {
           <span className="inline-flex rounded-full border-2 border-black bg-white px-4 py-2 text-xs font-black uppercase shadow-[4px_4px_0_#000]">
             2ГИС importer
           </span>
-          <h1 className="mt-7 text-5xl font-black uppercase leading-none md:text-7xl">Вставь отзывы сюда</h1>
+          <h1 className="mt-7 text-5xl font-black uppercase leading-none md:text-7xl">Импорт 2ГИС</h1>
           <p className="mt-5 text-base font-bold leading-7 text-black/65">
-            Скопируйте отзывы из 2ГИС и вставьте текстом. FeedPay распарсит блоки, поставит rating, запустит AI-score и добавит всё в dashboard.
+            Вставьте ссылку заведения 2ГИС и запустите Apify scraper или скопируйте отзывы текстом. FeedPay поставит AI-score и добавит всё в dashboard.
           </p>
           <div className="mt-8 grid gap-3">
             {[
-              ['Безопаснее скрейпинга', 'Не обходим CORS и не зависим от HTML 2ГИС'],
+              ['Apify scraper', 'Запускаем Actor zen-studio/2gis-reviews-scraper на backend'],
               ['AI оценка', 'Каждый импортированный отзыв проходит тот же scoring'],
               ['Dashboard ready', 'Темы, купоны и статистика появляются сразу'],
             ].map(([title, text]) => (
@@ -97,6 +136,44 @@ export function ImportPage() {
                 placeholder="Например: кофейня на Абая"
               />
             </label>
+
+            <div className="rounded-[1.5rem] border-2 border-black bg-[#CCFF00] p-4">
+              <div className="mb-4 flex items-center gap-3">
+                <span className="grid size-11 place-items-center rounded-full border-2 border-black bg-white">
+                  <Link2 className="size-5" />
+                </span>
+                <div>
+                  <p className="font-black uppercase">Парсинг по ссылке 2ГИС</p>
+                  <p className="text-sm font-bold text-black/55">Нужен `APIFY_TOKEN` в `.env` и `npm run dev:full`.</p>
+                </div>
+              </div>
+              <div className="grid gap-3 md:grid-cols-[1fr_120px]">
+                <input
+                  className="rounded-[1.35rem] border-2 border-black bg-white px-4 py-3 font-bold outline-none transition focus:shadow-[5px_5px_0_#000]"
+                  value={placeUrl}
+                  onChange={(event) => setPlaceUrl(event.target.value)}
+                  placeholder="https://2gis.ru/.../firm/..."
+                />
+                <input
+                  className="rounded-[1.35rem] border-2 border-black bg-white px-4 py-3 font-bold outline-none transition focus:shadow-[5px_5px_0_#000]"
+                  type="number"
+                  min={1}
+                  max={500}
+                  value={maxReviews}
+                  onChange={(event) => setMaxReviews(Number(event.target.value))}
+                  aria-label="Максимум отзывов"
+                />
+              </div>
+              <button
+                type="button"
+                onClick={scrapeWithApify}
+                disabled={isScraping || !placeUrl.trim()}
+                className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full border-2 border-black bg-[#0038FF] px-6 py-4 text-sm font-black uppercase text-white shadow-[6px_6px_0_#000] transition hover:-translate-y-0.5 disabled:opacity-60"
+              >
+                {isScraping ? 'Apify парсит 2ГИС...' : 'Запустить Apify scraper'}
+                <Sparkles className="size-5" />
+              </button>
+            </div>
 
             <label className="grid gap-2">
               <span className="text-sm font-black uppercase">Отзывы из 2ГИС</span>
@@ -131,6 +208,8 @@ export function ImportPage() {
               {isImporting ? 'AI анализирует импорт...' : 'Импортировать в dashboard'}
               <Sparkles className="size-5" />
             </button>
+
+            {error && <p className="rounded-[1.5rem] border-2 border-black bg-rose-100 p-4 text-sm font-black text-rose-800">{error}</p>}
 
             {importedCount > 0 && (
               <Link

@@ -33,6 +33,7 @@ Set:
 ```bash
 OPENAI_API_KEY=sk-your-key-here
 OPENAI_MODEL=gpt-4.1-mini
+APIFY_TOKEN=apify_api_your-token-here
 ```
 
 Start frontend and API together:
@@ -45,6 +46,17 @@ If the API key is missing or the API is unavailable, FeedPay automatically falls
 
 ## 2GIS Import
 
-Go to `/import`, paste copied reviews from 2GIS into the textarea, set the product/branch name, and click import. The app parses separate review blocks, runs scoring, and saves them to the dashboard.
+Go to `/import`.
 
-Direct scraping is intentionally not used in the browser because public review pages can block cross-origin requests and may change markup or access rules.
+There are two modes:
+
+- Paste copied reviews from 2GIS into the textarea. The app parses separate review blocks, runs scoring, and saves them to the dashboard.
+- Paste a 2GIS place URL and run the Apify scraper. This requires `APIFY_TOKEN` in `.env` and `npm run dev:full`.
+
+The Apify integration uses the Actor `zen-studio/2gis-reviews-scraper` by default. You can override it:
+
+```bash
+APIFY_2GIS_ACTOR=zen-studio/2gis-reviews-scraper
+```
+
+Direct scraping is intentionally not used in the browser because public review pages can block cross-origin requests and may change markup or access rules. The backend calls Apify, normalizes the returned review JSON, then FeedPay runs scoring and saves reviews locally.

@@ -36,5 +36,5 @@ export type Review = {
   criteria: ReviewCriteria
   topics: string[]
   createdAt: string
-  source?: 'manual' | '2gis-import' | 'demo'
+  source?: 'manual' | '2gis-import' | '2gis-apify' | 'demo'
 }

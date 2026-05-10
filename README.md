@@ -53,10 +53,10 @@ There are two modes:
 - Paste copied reviews from 2GIS into the textarea. The app parses separate review blocks, runs scoring, and saves them to the dashboard.
 - Paste a 2GIS place URL and run the Apify scraper. This requires `APIFY_TOKEN` in `.env` and `npm run dev:full`.
 
-The Apify integration uses the Actor `zen-studio/2gis-reviews-scraper` by default. You can override it:
+The Apify integration uses the Actor `zen-studio/2gis-places-scraper-api` by default. It returns place records with nested `reviews[]`, and FeedPay flattens those reviews for scoring. You can override it:
 
 ```bash
-APIFY_2GIS_ACTOR=zen-studio/2gis-reviews-scraper
+APIFY_2GIS_ACTOR=zen-studio/2gis-places-scraper-api
 ```
 
 Direct scraping is intentionally not used in the browser because public review pages can block cross-origin requests and may change markup or access rules. The backend calls Apify, normalizes the returned review JSON, then FeedPay runs scoring and saves reviews locally.

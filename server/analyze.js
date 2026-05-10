@@ -58,7 +58,7 @@ app.get('/api/health', (_request, response) => {
   response.json({ ok: true, ai: Boolean(client), apify: Boolean(process.env.APIFY_TOKEN) })
 })
 
-function normalizeApifyReview(item, index) {
+function normalizeApifyReview(item, index, place = {}) {
   const text =
     item.text ??
     item.reviewText ??
@@ -77,15 +77,35 @@ function normalizeApifyReview(item, index) {
     item.user?.name ??
     `2ГИС клиент ${index + 1}`
   const rating = Number(item.rating ?? item.stars ?? item.reviewRating ?? item.review?.rating ?? 5)
+  const businessReply = item.businessReply ?? item.reply ?? item.ownerResponse ?? item.officialAnswer ?? null
+  const placeName = place.name ?? place.fullName ?? place.orgName ?? null
 
   return {
     customerName: String(customerName).trim() || `2ГИС клиент ${index + 1}`,
     rating: Number.isFinite(rating) ? Math.max(1, Math.min(5, Math.round(rating))) : 5,
     text: String(text).trim(),
-    date: item.date ?? item.publishedAt ?? item.createdAt ?? item.reviewDate ?? null,
-    businessReply: item.businessReply ?? item.reply ?? item.ownerResponse ?? null,
+    date: item.date ?? item.publishedAt ?? item.createdAt ?? item.reviewDate ?? item.dateCreated ?? null,
+    businessReply,
+    placeName,
     raw: item,
   }
+}
+
+function normalizeApifyItems(items) {
+  const normalizedReviews = []
+
+  for (const item of Array.isArray(items) ? items : []) {
+    if (Array.isArray(item.reviews)) {
+      item.reviews.forEach((review) => {
+        normalizedReviews.push(normalizeApifyReview(review, normalizedReviews.length, item))
+      })
+      continue
+    }
+
+    normalizedReviews.push(normalizeApifyReview(item, normalizedReviews.length))
+  }
+
+  return normalizedReviews.filter((review) => review.text.length > 2)
 }
 
 app.post('/api/import/2gis', async (request, response) => {
@@ -103,12 +123,16 @@ app.post('/api/import/2gis', async (request, response) => {
     return
   }
 
-  const actor = process.env.APIFY_2GIS_ACTOR ?? 'zen-studio/2gis-reviews-scraper'
+  const actor = process.env.APIFY_2GIS_ACTOR ?? 'zen-studio/2gis-places-scraper-api'
   const actorId = actor.replace('/', '~')
   const input = {
     startUrls: [url],
-    maxPlaces: 1,
+    maxResults: 1,
     maxReviews,
+    maxPhotos: 0,
+    language: 'ru',
+    reviewsRating: 'all',
+    reviewsSource: 'all',
     proxyConfiguration: {
       useApifyProxy: true,
       apifyProxyGroups: ['RESIDENTIAL'],
@@ -132,9 +156,7 @@ app.post('/api/import/2gis', async (request, response) => {
     }
 
     const items = await apifyResponse.json()
-    const reviews = (Array.isArray(items) ? items : [])
-      .map(normalizeApifyReview)
-      .filter((review) => review.text.length > 2)
+    const reviews = normalizeApifyItems(items)
 
     response.json({
       actor,

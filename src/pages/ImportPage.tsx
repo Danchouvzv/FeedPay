@@ -26,7 +26,7 @@ export function ImportPage() {
   const parsed = useMemo(() => parse2gisReviews(rawText), [rawText])
 
   const analyzeAndSave = async (
-    reviews: Array<{ customerName: string; rating: number; text: string; date?: string | null }>,
+    reviews: Array<{ customerName: string; rating: number; text: string; date?: string | null; placeName?: string | null }>,
     source: '2gis-import' | '2gis-apify',
   ) => {
     if (!productName.trim() || reviews.length === 0) return 0
@@ -38,7 +38,7 @@ export function ImportPage() {
       analyzedReviews.push({
         id: crypto.randomUUID(),
         customerName: parsedReview.customerName,
-        productName: productName.trim(),
+        productName: parsedReview.placeName?.trim() || productName.trim(),
         rating: parsedReview.rating,
         text: parsedReview.text,
         score: analysis.score,
@@ -103,7 +103,7 @@ export function ImportPage() {
           </p>
           <div className="mt-8 grid gap-3">
             {[
-              ['Apify scraper', 'Запускаем Actor zen-studio/2gis-reviews-scraper на backend'],
+              ['Apify scraper', 'Запускаем Actor zen-studio/2gis-places-scraper-api на backend'],
               ['AI оценка', 'Каждый импортированный отзыв проходит тот же scoring'],
               ['Dashboard ready', 'Темы, купоны и статистика появляются сразу'],
             ].map(([title, text]) => (
@@ -144,7 +144,7 @@ export function ImportPage() {
                 </span>
                 <div>
                   <p className="font-black uppercase">Парсинг по ссылке 2ГИС</p>
-                  <p className="text-sm font-bold text-black/55">Нужен `APIFY_TOKEN` в `.env` и `npm run dev:full`.</p>
+                  <p className="text-sm font-bold text-black/55">Нужен `APIFY_TOKEN` в `.env`. Actor вернёт place + reviews.</p>
                 </div>
               </div>
               <div className="grid gap-3 md:grid-cols-[1fr_120px]">

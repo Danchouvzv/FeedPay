@@ -6,6 +6,7 @@ import { ReviewCard } from '../components/ReviewCard'
 import { StatCard } from '../components/StatCard'
 import { clearReviews, getReviews, resetDemoReviews } from '../utils/storage'
 import { topicKeywords } from '../utils/analyzeReview'
+import { getActionItems, getDuplicateGroups, getPipelineMetrics } from '../utils/intelligence'
 import type { ReviewLevel } from '../types/review'
 
 const levelOrder: ReviewLevel[] = ['Слабый отзыв', 'Средний отзыв', 'Полезный отзыв', 'Очень полезный отзыв']
@@ -42,6 +43,9 @@ export function DashboardPage() {
     }))
     .filter((item) => item.count > 0)
     .sort((a, b) => b.count - a.count)
+  const actions = getActionItems(reviews)
+  const duplicateGroups = getDuplicateGroups(reviews)
+  const pipelineMetrics = getPipelineMetrics(reviews)
 
   const refreshDemo = () => {
     resetDemoReviews()
@@ -80,6 +84,12 @@ export function DashboardPage() {
             >
               Import 2ГИС
             </Link>
+            <Link
+              to="/pipeline"
+              className="inline-flex items-center justify-center gap-2 rounded-full border-2 border-black bg-white px-5 py-4 text-sm font-black uppercase text-black shadow-[5px_5px_0_#000] transition hover:-translate-y-0.5"
+            >
+              Pipeline
+            </Link>
             <button
               onClick={clear}
               className="inline-flex items-center justify-center gap-2 rounded-full border-2 border-black bg-white px-5 py-4 text-sm font-black uppercase text-black shadow-[5px_5px_0_#000] transition hover:-translate-y-0.5"
@@ -96,6 +106,46 @@ export function DashboardPage() {
         <StatCard title="Средний рейтинг" value={stats.avgRating.toFixed(1)} caption="Оценка клиентов от 1 до 5" icon={Star} />
         <StatCard title="Средняя полезность" value={`${Math.round(stats.avgScore)}/100`} caption="Качество обратной связи" icon={Target} />
         <StatCard title="Выдано купонов" value={stats.coupons} caption="FEED3, FEED5 и FEED10" icon={Gift} />
+      </section>
+
+      <section className="mt-6 grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+        <article className="rounded-[2.5rem] border-2 border-black bg-white p-5 text-black shadow-[10px_10px_0_#000]">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <p className="text-xs font-black uppercase text-black/45">AI action board</p>
+              <h2 className="mt-1 text-2xl font-black uppercase">Что чинить первым</h2>
+            </div>
+            <Link to="/pipeline" className="rounded-full bg-[#0038FF] px-4 py-2 text-xs font-black uppercase text-white">
+              full pipeline
+            </Link>
+          </div>
+          <div className="mt-5 grid gap-3">
+            {actions.length ? (
+              actions.slice(0, 3).map((item) => (
+                <div key={item.topic} className="rounded-[1.5rem] border-2 border-black bg-[#F8F9FA] p-4">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <h3 className="font-black uppercase">{item.title}</h3>
+                    <span className="rounded-full bg-[#CCFF00] px-3 py-1 text-xs font-black">{item.priority}</span>
+                  </div>
+                  <p className="mt-2 text-sm font-bold text-black/55">{item.description}</p>
+                </div>
+              ))
+            ) : (
+              <p className="rounded-[1.5rem] bg-[#F8F9FA] p-4 text-sm font-bold text-black/55">Action items появятся после отзывов.</p>
+            )}
+          </div>
+        </article>
+
+        <article className="rounded-[2.5rem] border-2 border-black bg-[#0038FF] p-5 text-white shadow-[10px_10px_0_#000]">
+          <p className="text-xs font-black uppercase text-white/50">Pipeline health</p>
+          <h2 className="mt-1 text-2xl font-black uppercase">Automation loop</h2>
+          <div className="mt-5 grid grid-cols-2 gap-3">
+            <MiniMetric label="AI ready" value={`${pipelineMetrics.automationRate}%`} />
+            <MiniMetric label="Imported" value={pipelineMetrics.imported} />
+            <MiniMetric label="Duplicates" value={duplicateGroups.length} />
+            <MiniMetric label="Urgent" value={pipelineMetrics.urgent} />
+          </div>
+        </article>
       </section>
 
       <section className="mt-6 grid gap-6 lg:grid-cols-[1fr_0.9fr]">
@@ -158,6 +208,15 @@ export function DashboardPage() {
         </article>
       </section>
     </main>
+  )
+}
+
+function MiniMetric({ label, value }: { label: string; value: string | number }) {
+  return (
+    <div className="rounded-[1.5rem] border border-white/25 bg-white/10 p-4">
+      <p className="text-xs font-black uppercase text-white/50">{label}</p>
+      <p className="mt-1 text-3xl font-black">{value}</p>
+    </div>
   )
 }
 

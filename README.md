@@ -56,6 +56,7 @@ If OpenAI is not configured or unavailable, FeedPay automatically falls back to 
 - `/coupon` — generated coupon with QR code.
 - `/dashboard` — business analytics dashboard.
 - `/import` — import reviews from pasted text or from 2GIS through Apify.
+- `/pipeline` — FeedPay Intelligence Engine: ingest, normalize, trust layer, AI score, action routing, and growth loop.
 
 ## Business Dashboard
 
@@ -69,6 +70,26 @@ The dashboard shows:
 - Reviews over time
 - Frequent topics such as delivery, packaging, price, quality, personnel, service, app, product, and returns
 - Latest reviews with rating, score, coupon, source, and topics
+- AI action board with suggested business priorities
+- Pipeline health metrics such as imported reviews, duplicate groups, urgent items, and automation rate
+
+## Intelligence Pipeline
+
+FeedPay includes a technical pipeline that turns raw reviews into business actions:
+
+1. Ingest reviews from manual form, pasted text, 2GIS/Apify, and future webhooks.
+2. Normalize data into one `Review` structure.
+3. Detect duplicate or low-trust review patterns.
+4. Score review quality with OpenAI or local fallback.
+5. Extract topics and calculate risk per business area.
+6. Generate prioritized action items for operators and managers.
+
+The pipeline is implemented in:
+
+```text
+src/utils/intelligence.ts
+src/pages/PipelinePage.tsx
+```
 
 ## 2GIS Import
 

@@ -5,6 +5,7 @@ import { CouponPage } from './pages/CouponPage'
 import { DashboardPage } from './pages/DashboardPage'
 import { LandingPage } from './pages/LandingPage'
 import { ImportPage } from './pages/ImportPage'
+import { PipelinePage } from './pages/PipelinePage'
 import { ReviewPage } from './pages/ReviewPage'
 
 function App() {
@@ -26,6 +27,7 @@ function AppShell() {
           <Route path="/" element={<LandingPage />} />
           <Route path="/review" element={<ReviewPage />} />
           <Route path="/import" element={<ImportPage />} />
+          <Route path="/pipeline" element={<PipelinePage />} />
           <Route path="/analysis" element={<AnalysisPage />} />
           <Route path="/coupon" element={<CouponPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
